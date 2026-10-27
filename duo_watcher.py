@@ -2,7 +2,7 @@
 """
 iPhone Duo – Abhol-Verfügbarkeits-Watcher (Apple Store DE)
 
-Läuft als GitHub Action alle ~5 Min (oder lokal mit --loop).
+Läuft als GitHub Action alle ~5 Min mit 3 Prüfungen je Lauf = alle ~2 Min (oder lokal mit --loop).
 Push aufs iPhone via ntfy.sh (App "ntfy", Topic abonnieren).
 """
 
@@ -119,5 +119,13 @@ if __name__ == "__main__":
             except Exception as e:
                 print("Fehler:", e)
             time.sleep(90 + random.uniform(0, 30))
-    else:                               # GitHub Action: einmal prüfen
+    elif "--repeat" in sys.argv:        # GitHub Action: 3x im Abstand von 2 Min
+        for i in range(3):
+            try:
+                check()
+            except Exception as e:
+                print("Fehler:", e)
+            if i < 2:
+                time.sleep(120)
+    else:                               # einmal prüfen
         check()
