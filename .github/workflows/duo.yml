@@ -2,7 +2,7 @@ name: Duo Watcher
 
 on:
   schedule:
-    - cron: "*/5 * * * *"   # alle 5 Min (GitHub verzögert teils um ein paar Min)
+    - cron: "*/5 * * * *"   # GitHub-Minimum: 5 Min; jeder Lauf prüft 3x (0/2/4 Min)
   workflow_dispatch:
     inputs:
       test:
@@ -10,10 +10,14 @@ on:
         type: boolean
         default: false
 
+concurrency:
+  group: duo-watcher
+  cancel-in-progress: false
+
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -27,6 +31,6 @@ jobs:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
       - name: Verfügbarkeit prüfen
         if: ${{ !inputs.test }}
-        run: python duo_watcher.py
+        run: python duo_watcher.py --repeat
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
